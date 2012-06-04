@@ -11,18 +11,23 @@
     <form>
       Country:
       <select id="country" type="text" name="country">
-        <option value="us">USA</option>
-        <option value="de">Germany</option>
-        <option value="fr">France</option>
-        <option value="es">Spain</option>
-        <option value="it">Italy</option>
+        <option data-jzippopotam-value="us" value="us">USA</option>
+        <option data-jzippopotam-value="de" value="de">Germany</option>
+        <option data-jzippopotam-value="fr" value="fr">France</option>
+        <option data-jzippopotam-value="es" value="es">Spain</option>
+        <option data-jzippopotam-value="it" value="it">Italy</option>
       </select>
       <br>
 
       Zip code: <input id="zip" type="text" name="zip">
       <br>
 
-      Place: <input id="place" type="text" name="palce"> state: <input id="state" type="text" name="state">
+      Place: <input id="place" type="text" name="palce">
+      <br>
+      Place - State: <input id="state" type="text" name="state">
+      <br>
+
+      Place - LatLgn: <input id="place-lat-lng" type="text">
       <br>
 
       <button type="submit">Do nothing</button>
@@ -35,8 +40,20 @@
         $.jzippopotam({
           country: $('#country'),
           zip: $('#zip'),
-          place: $('#place'),
-          state: $('#state')
+          output: [
+            {
+              field: $('#place'),
+              format: '{{place name}}'
+            },
+            {
+              field: $('#state'),
+              format: '{{place name}} - {{state}}'
+            },
+            {
+              field: $('#place-lat-lng'),
+              format: '{{place name}}: {{latitude}},{{longitude}}'
+            }
+          ]
         });
       })( jQuery, window, document );
     </script>

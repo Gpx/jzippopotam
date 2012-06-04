@@ -1,39 +1,91 @@
 ;(function ( $, window, document, undefined ) {
-  
-  function emptyDataLists( options ) {
-    options.placeDatalist.empty();
-  }
 
-  function addDataLists( options ) {
-    options.placeDatalist = $('<datalist>', {id: 'jzippopotam-datalist-place'});
-    options.place.after( options.placeDatalist ).attr('list', 'jzippopotam-datalist-place');
-  }
+  var defaultSettings = {
+        countryValue: '',
+        zipValue: ''
+      },
+      fields = ['country', 'zip'];
 
-  function updateDataLists( options ) {
-    var country = options.country.val(),
-        zip = options.zip.val();
-
-    if ( country.length !== 2 || $.trim( zip ) === '') return;
-
-    $.getJSON('http://api.zippopotam.us/'+country+'/'+zip, function( data ) {
-      if ( data === {} ) return;
-
-      emptyDataLists( options );
-      for ( var i = 0, l = data.places.length; i < l; i++ ) {
-        options.placeDatalist.append( $('<option>', {value: data.places[i]['place name']}) );
+  function attachHandlersToFields( settings ) {
+    $.each( fields, function( index, fieldName ) {
+      if ( $.type( settings[fieldName] ) !== 'string' ) {
+        settings[fieldName].on('change', function(){
+          updateValues( settings );
+          updateDatalists( settings );
+        });
       }
+    });
+  }
+
+  function attachDatalistToFields( settings ) {
+    var field, datalist, datalistId;
+
+    for ( var i = 0, l = settings.output.length; i < l; i++ ) {
+      field = settings.output[i].field;
+      datalistId = 'jzippopotam-datalist' + Date.now();
+      datalist = $('<datalist>', {id: datalistId});
+
+      settings.output[i].datalist = datalist;
+      field.after( datalist ).attr('list', datalistId );
+    }
+  }
+
+  function updateValues( settings, writeStrings ) {
+    writeStrings = writeStrings || false;
+
+    $.each( fields, function( index, fieldName ) {
+      if ( $.type( settings[fieldName] ) !== 'string' ) {
+        settings[fieldName + 'Value'] =
+          settings[fieldName].data('jzippopotam-value') ||
+          settings[fieldName].val();
+      } else if ( writeStrings ) {
+        settings[fieldName + 'Value'] = settings[fieldName];
+      }
+    });
+  }
+
+  function updateDatalists( settings ) {
+    var country = settings.countryValue,
+        zip = settings.zipValue,
+        place, format;
+
+    if ( $.trim( country ).length !== 2 ) return;
+    if ( $.trim( zip ).length <= 0 ) return;
+
+    $.getJSON('http://api.zippopotam.us/'+country+'/'+zip)
+      .success(function( data ) {
+        for ( var i = 0, l = settings.output.length; i < l; i++ ) {
+          datalist = settings.output[i].datalist;
+          datalist.empty();
+          
+          for ( var j = 0, l2 = data.places.length; j < l2; j++ ) {
+            place = data.places[j];
+            format = settings.output[i].format;
+            datalist.append( $('<option>', {
+              value: renderDatalistValue( place, format )
+            }) );
+          }
+        }
+      });
+  }
+
+  function renderDatalistValue( place, format ) {
+    return format.replace(/\{\{(\w|\s)+\}\}/gi, function( match ) {
+      var parameterName = match.slice( 2, -2 );
+      return place[parameterName];
     });
   }
 
   var methods = {
     init: function( options ) {
-      addDataLists( options );
-      updateDataLists( options );
-      $.each([options.country, options.zip], function( index, field ) {
-        field.on('change', function() {
-          updateDataLists( options );
-        });
-      });
+
+      var settings = $.extend( {}, defaultSettings, options );
+      
+      attachHandlersToFields( settings );
+      attachDatalistToFields( settings );
+      updateValues( settings, true );
+      updateDatalists( settings );
+    
     }
   };
 
