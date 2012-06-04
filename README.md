@@ -1,6 +1,6 @@
 # jzippopotam
 
-Populate datalist data using zippopotam.us API
+Populate a datalist using zippopotam.us API
 
 ## Requirements
 
