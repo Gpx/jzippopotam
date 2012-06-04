@@ -52,6 +52,11 @@
     if ( $.trim( country ).length !== 2 ) return;
     if ( $.trim( zip ).length <= 0 ) return;
 
+    for ( var i = 0, l = settings.output.length; i < l; i++ ) {
+      datalist = settings.output[i].datalist;
+      datalist.empty();
+    }
+
     $.getJSON('http://api.zippopotam.us/'+country+'/'+zip)
       .success(function( data ) {
         for ( var i = 0, l = settings.output.length; i < l; i++ ) {
