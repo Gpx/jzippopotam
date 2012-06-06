@@ -22,7 +22,7 @@
 
     for ( var i = 0, l = settings.output.length; i < l; i++ ) {
       field = settings.output[i].field;
-      datalistId = 'jzippopotam-datalist' + Date.now();
+      datalistId = 'jzippopotam-datalist' + Math.random();
       datalist = $('<datalist>', {id: datalistId});
 
       settings.output[i].datalist = datalist;
